@@ -2,9 +2,8 @@
 // import Cronjob from "node-cron"
 import cheerio from "cheerio"
 import axios from "axios";
-// import request from "request-promise";
-// import * as dotenv from 'dotenv' // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
-// dotenv.config()
+import * as dotenv from 'dotenv' // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
+dotenv.config()
 import express from "express"; 
 import { MongoClient } from "mongodb";
 import cors from "cors"
