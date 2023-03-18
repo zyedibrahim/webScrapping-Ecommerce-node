@@ -21,18 +21,19 @@ const PORT = process.env.port;
 app.get("/", function (request, response) {
   response.send("🙋‍♂️, 🌏 🎊✨🤩");
 });
-app.get("/scrapdata", async function (request, response) {
 
-const data = await client
-.db("scrapdataDB")
-.collection("alldata")
-.find({})
-.toArray()
+app.delete("/scrapdata", async function (request, response) {
 
-response.send(data)
+  const data = await client
+  .db("scrapdataDB")
+  .collection("alldata")
+  .deleteMany()
+  
+  response.send(data)
+  
+  
+  });
 
-
-});
 app.delete("/scrapdata/gadget", async function (request, response) {
 
 const data = await client
@@ -48,18 +49,18 @@ app.delete("/scrapdata/watch", async function (request, response) {
 
 const data = await client
 .db("scrapdataDB")
-.collection("gadget")
+.collection("watch")
 .deleteMany()
 
 response.send(data)
 
 
 });
-app.delete("/scrapdata/videogame", async function (request, response) {
+app.delete("/scrapdata/cloths", async function (request, response) {
 
 const data = await client
 .db("scrapdataDB")
-.collection("gadget")
+.collection("cloths")
 .deleteMany()
 
 response.send(data)
@@ -70,8 +71,8 @@ response.send(data)
 
 
 const url = 'https://www.flipkart.com/search?q=electronics';
-// const Amazonurl ="https://www.amazon.in/s?k=rings"
-// const Amazonurl ="https://www.amazon.com/"
+const urlflipkart = 'https://www.flipkart.com/search?q=cloths';
+
 const snapdeal ="https://www.snapdeal.com/search?keyword=watch&sort=rlvncy"
 
 async function scrapeFlipkart() {
@@ -143,7 +144,7 @@ async function scrapeSnapdeal() {
       products.push(product);      
     })
 
-    const finalproducts = products.slice(0,10)
+    const finalproducts = products.slice(0,20)
 
 for(let value of finalproducts){
 const data = await client
@@ -179,99 +180,82 @@ console.log('Scraped snapdeal successfully');
         }
       }
 
-// async function scrapeAmazon() {
-//   try {
-//     const response = await axios.get(Amazonurl);
-//     const $ = cheerio.load(response.data);
-//     const products = [];
+async function scrapCloths() {
+  try {
+    const response = await axios.get(urlflipkart);
+    const $ = cheerio.load(response.data);
+    const products = [];
 
-//     // $('div[data-component-type="s-search-result"]').each((index, element) => {
-//     //   const title = $(element).find('h2 > a > span').text().trim();
-//     //   const rating = $(element).find('div[data-asin="' + $(element).attr('data-asin') + '"] > div > div.a-section.a-spacing-none.a-spacing-top-micro > div.a-row.a-size-small > span:nth-child(1) > span.a-icon-alt').text().trim();
-//     //   const offer = $(element).find('span[data-component-type="s-prime-info"]').text().trim();
-//     //   const price = $(element).find('a > span.a-offscreen').text().trim();
-//     //   const image = $(element).find('img').attr('src');
-
-//     //   products.push({
-//     //     title: title,
-//     //     rating: rating,
-//     //     offer: offer,
-//     //     price: price,
-//     //     image: image
-//     //   });
-//     // });
-
-//     $('div.product').each((index, element) => {
-//       const rating = $(element).find('div.rating').text();
-//       const title = $(element).find('h1.title').text();
-//       const offer = $(element).find('span.offer').text();
-//       const price = $(element).find('span.price').text();
-//       const image = $(element).find('img.image').attr('src');
-//       console.log(`Product ${index + 1}:`);
-//       console.log(`Rating: ${rating}`);
-//       console.log(`Title: ${title}`);
-//       console.log(`Offer: ${offer}`);
-//       console.log(`Price: ${price}`);
-//       console.log(`Image: ${image}`);
-//     });
+    $('._1AtVbE').each((index, element) => {
+      const product = {
+        image: $(element).find('img._2r_T1I').attr('src'),
+        title: $(element).find('._2WkVRV').text(),
+        price: $(element).find("._30jeq3").text().slice(0,4),
+        offer: $(element).find('._3Ay6Sb > span').text().slice(0,7)
+      };
+      products.push(product);
+    });
     
-  
+    const finalproducts = products.slice(2,12)
+    console.log(finalproducts);
 
+for(let value of finalproducts){
+const data = await client
+.db("scrapdataDB")
+.collection("cloths")
+.findOneAndUpdate({title:value.title},{$set :{...value}}  )
+if(data.lastErrorObject.updatedExisting == false){
+  const data = await client
+    .db("scrapdataDB")
+    .collection("cloths")
+    .insertOne(value)
+}
+}   
+for(let value of finalproducts){
+const data = await client
+.db("scrapdataDB")
+.collection("alldata")
+.findOneAndUpdate({title:value.title},{$set :{...value}}  )
+if(data.lastErrorObject.updatedExisting == false){
+  const data = await client
+    .db("scrapdataDB")
+    .collection("alldata")
+    .insertOne(value)
+}
+}   
+console.log('Scraped flipkart cloths successfully');
 
-//     // const finalproducts = products.slice(0,12)
+  } 
+    catch (err) {
+          console.log('Error scraping amazon:', err);
+        }
+      }
 
-// // for(let value of finalproducts){
-// // const data = await client
-// // .db("scrapdataDB")
-// // .collection("videogame")
-// // .findOneAndUpdate({title:value.title},{$set :{...value}}  )
-// // if(data.lastErrorObject.updatedExisting == false){
-// //   const data = await client
-// //     .db("scrapdataDB")
-// //     .collection("videogame")
-// //     .insertOne(value)
-// // }
-// // }   
-// // for(let value of finalproducts){
-// // const data = await client
-// // .db("scrapdataDB")
-// // .collection("alldata")
-// // .findOneAndUpdate({title:value.title},{$set :{...value}}  )
-// // if(data.lastErrorObject.updatedExisting == false){
-// //   const data = await client
-// //     .db("scrapdataDB")
-// //     .collection("alldata")
-// //     .insertOne(value)
-// // }
-// // }   
-// console.log('Scraped amazon successfully');
-
-//   } 
-//     catch (err) {
-//           console.log('Error scraping amazon:', err);
-//         }
-//       }
-
-
-      // scrapeFlipkart()
-      // scrapeSnapdeal()
-    // scrapeAmazon()
-
-
-
-scrapeFlipkart()
-scrapeSnapdeal()
+      scrapeFlipkart()
+      scrapeSnapdeal()
+      scrapCloths()
 
     Cron.schedule('0 */12 * * *', () => {
       console.log('Scraping data from flikart...');
       console.log('Scraping data from snapdeal...');
-      console.log('Scraping data from amazon...');
+      console.log('Scraping data from flikart cloths...');
       scrapeFlipkart()
       scrapeSnapdeal()
-      // scrapeAmazon()
+ scrapCloths()
     });
 
+    app.get("/scrapdata", async function (request, response) {
 
+      const data = await client
+      .db("scrapdataDB")
+      .collection("alldata")
+      .find({})
+      .toArray()
+      
+      response.send(data)
+      
+      
+      });
     app.get("/scrapdata/gadget", async function (request, response) {
 
       const data = await client
@@ -295,18 +279,18 @@ scrapeSnapdeal()
       response.send(data)
       
     })
-//  app.get("/scrapdata/videogame", async function (request, response) {
+    app.get("/scrapdata/cloths", async function (request, response) {
 
-//       const data = await client
-//       .db("scrapdataDB")
-//       .collection("videogame")
-//       .find({})
-//       .toArray()
-
-//       response.send(data)
+      const data = await client
+      .db("scrapdataDB")
+      .collection("cloths")
+      .find({})
+      .toArray()
       
-//  })
-
+      response.send(data)
+      
+      
+      });
 
 
 app.listen(PORT, () => console.log(`The server started in: ${PORT} ✨✨`));
