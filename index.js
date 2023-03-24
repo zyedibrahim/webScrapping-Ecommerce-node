@@ -93,7 +93,7 @@ async function scrapeFlipkart() {
       products.push(product);
     });
 
-    const finalproducts = products.slice(0,10)
+    const finalproducts = products.slice(0,16)
 
 for(let value of finalproducts){
   const dat = await client
@@ -144,7 +144,7 @@ async function scrapeSnapdeal() {
       products.push(product);      
     })
 
-    const finalproducts = products.slice(0,10)
+    const finalproducts = products.slice(0,16)
 
 for(let value of finalproducts){
 const data = await client
@@ -196,7 +196,7 @@ async function scrapCloths() {
       products.push(product);
     });
     
-    const finalproducts = products.slice(2,12)
+    const finalproducts = products.slice(2,19)
     console.log(finalproducts);
 
 for(let value of finalproducts){
