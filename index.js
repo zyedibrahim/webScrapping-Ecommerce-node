@@ -144,7 +144,7 @@ async function scrapeSnapdeal() {
       products.push(product);      
     })
 
-    const finalproducts = products.slice(0,20)
+    const finalproducts = products.slice(0,10)
 
 for(let value of finalproducts){
 const data = await client
